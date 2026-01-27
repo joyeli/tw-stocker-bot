@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+
+# Environment & Secrets
+.env
+.DS_Store
+test/.env
+
+# Bot Configuration (Local)
+bot-env.json
+bot-config.json
+system_config.json
+config/local.json
+
+# Skill data (if inside bot)
+tw-stocker-consultant/assets/config/user_config.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
+
+# AI Context
+GEMINI.md
+STATUS.md
