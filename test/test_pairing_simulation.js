@@ -56,7 +56,8 @@ async function runTest() {
     console.log(chalk.blue.bold('🧪 啟動 Telegram 配對邏輯模擬測試...\n'));
 
     // Load the module AFTER mocking
-    const { startPairing } = require('./src/utils/telegram-pairing');
+    // Note: Path is relative to this test file
+    const { startPairing } = require('../src/utils/telegram-pairing');
     
     // We need to capture the MockTelegraf instance to emit events
     // Since startPairing creates a new instance internally, we rely on the fact that
