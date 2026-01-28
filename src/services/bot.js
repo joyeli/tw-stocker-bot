@@ -9,7 +9,8 @@ const SchedulerService = require('./scheduler');
 
 class BotService {
     constructor() {
-        this.config = new Conf({ projectName: 'tw-stocker-bot' });
+        // Use 'bot-config' to match init.js
+        this.config = new Conf({ projectName: 'tw-stocker-bot', configName: 'bot-config' });
         this.token = process.env.BOT_TOKEN || this.config.get('telegram.token');
         
         if (!this.token) {
