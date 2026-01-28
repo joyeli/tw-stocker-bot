@@ -91,7 +91,11 @@ class GeminiAdapter extends BaseAdapter {
         return true;
     }
 
-    async execute(prompt, context = {}, model = 'gemini-1.5-pro') {
+    async execute(prompt, context = {}, model) {
+        if (!model) {
+            throw new Error("AI Model not specified. Please run 'init' to select a model.");
+        }
+
         // 1. Construct System Context
         const contextStr = JSON.stringify(context, null, 2);
         const fullPrompt = `

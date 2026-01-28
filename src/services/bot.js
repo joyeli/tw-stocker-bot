@@ -20,13 +20,19 @@ class BotService {
         const agent = new https.Agent({ family: 4, keepAlive: true });
         this.bot = new Telegraf(this.token, { telegram: { agent } });
         
+        
         // Setup AI Adapter
-        const cliName = this.config.get('ai.cli') || 'gemini';
-        this.model = this.config.get('ai.model') || 'gemini-1.5-pro';
+        const cliName = this.config.get('ai.cli');
+        this.model = this.config.get('ai.model');
+
+        if (!cliName || !this.model) {
+            throw new Error("尚未設定 AI 引擎或模型。請先執行 'tw-stocker-bot init' 進行初始化。");
+        }
+
         this.adapter = aiCli.getAdapter(cliName);
         
         if (!this.adapter) {
-            throw new Error(`找不到 AI Adapter '${cliName}'。請先執行 'init' 初始化。`);
+            throw new Error(`找不到 AI Adapter '${cliName}'。請重新執行 'init'。`);
         }
 
         // Setup Scheduler
