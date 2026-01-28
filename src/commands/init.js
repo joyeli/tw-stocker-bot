@@ -164,7 +164,9 @@ async function initCommand(options) {
 
             // Save Owner ID
             userConfig.set('telegram.ownerId', result.ownerId);
-            userConfig.set('telegram.username', result.username);
+            if (result.username) {
+                userConfig.set('telegram.username', result.username);
+            }
             console.log(chalk.green(`   ✅ 綁定擁有者 ID: ${result.ownerId}`));
 
         } catch (e) {
