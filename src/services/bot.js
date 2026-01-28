@@ -206,7 +206,12 @@ class BotService {
                         await ctx.telegram.deleteMessage(chatId, msgId);
                     } catch (e) { /* ignore if delete fails */ }
                     
-                    await ctx.telegram.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+                    try {
+                        await ctx.telegram.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+                    } catch (e) {
+                        console.warn(chalk.yellow(`[Telegram] Markdown 格式錯誤，降級為純文字發送: ${e.message}`));
+                        await ctx.telegram.sendMessage(chatId, response);
+                    }
 
                 } catch (e) {
                     console.error(chalk.red(`[AI 錯誤] ${e.message}`));
