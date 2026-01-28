@@ -90,8 +90,15 @@ class GeminiAdapter extends BaseAdapter {
         
         // Execute with logging enabled
         const res = shell.exec(cmd, { silent: false });
+        const output = res.stdout + res.stderr;
         
+        // Check for success keywords even if exit code is non-zero (e.g. auth warning)
         if (res.code !== 0) {
+            if (output.includes('Successfully installed') || output.includes('already exists')) {
+                console.log(chalk.green('   ✅ Skill 安裝成功 (已忽略非致命警告)'));
+                return true;
+            }
+
             console.warn(chalk.yellow('\n⚠️  自動安裝 Skill 失敗。'));
             console.log(chalk.white('這可能是因為 API Key 未設定或網路問題。請嘗試手動執行以下指令：'));
             console.log(chalk.cyan(`\n  ${cmd}\n`));
