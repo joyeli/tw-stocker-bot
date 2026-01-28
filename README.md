@@ -25,11 +25,15 @@
 
 ## 🚀 快速開始 (Quick Start)
 
-### 0. 事前準備 (Prerequisite)
-請先向 Telegram 的官方機器人 **[@BotFather](https://t.me/BotFather)** 申請一組 Bot Token。
-*(詳細步驟請參閱 [使用者手冊](docs/USER_GUIDE.md#如何申請-telegram-bot-token))*
+### 0. 事前準備 (Prerequisites)
+在開始之前，請確保您已完成以下準備：
 
-### 1. 安裝 CLI 工具
+1.  **AI 引擎 (擇一安裝並完成登入)**:
+    *   **Gemini CLI** (推薦): `npm install -g @google/gemini-cli` (安裝後請執行 `gemini auth login`)
+    *   **Claude Code**: `npm install -g @anthropic-ai/claude-code` (安裝後請執行 `claude login`)
+2.  **Telegram Token**: 向 **[@BotFather](https://t.me/BotFather)** 申請一組 Bot Token。
+
+### 1. 安裝 TW-Stocker Bot
 ```bash
 npm install -g joyeli/tw-stocker-bot
 ```
