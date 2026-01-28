@@ -83,27 +83,11 @@ class GeminiAdapter extends BaseAdapter {
     }
 
     async installSkill(repoUrl) {
-        // Universal Local Clone Strategy for Gemini
-        const repoName = 'tw-stocker-consultant';
-        const targetPath = path.resolve(process.cwd(), repoName);
-
-        console.log(`[Gemini] 正在檢查 Skill: ${targetPath}...`);
+        console.log(`[Gemini] 正在安裝 Skill: ${repoUrl}...`);
         
-        // 1. Git Clone (if not exists)
-        if (!shell.test('-d', targetPath)) {
-            console.log(`[Gemini] 正在下載 Skill (Clone)...`);
-            if (shell.exec(`git clone ${repoUrl} ${targetPath}`).code !== 0) {
-                throw new Error("Git Clone 失敗");
-            }
-        } else {
-            console.log(chalk.gray(`   Skill 目錄已存在，跳過下載。`));
-        }
-
-        // 2. Register with Gemini (Local Path)
-        console.log(`[Gemini] 正在向 Gemini 註冊 Local Skill...`);
         // Use --consent to skip confirmation prompt
         // HACK: Prepend a dummy API key to bypass Gemini CLI's strict auth check during install
-        const cmd = `GEMINI_API_KEY=placeholder gemini skills install "${targetPath}" --scope workspace --consent`;
+        const cmd = `GEMINI_API_KEY=placeholder gemini skills install ${repoUrl} --scope workspace --consent`;
         
         // Execute with logging enabled
         const res = shell.exec(cmd, { silent: false });
@@ -116,9 +100,10 @@ class GeminiAdapter extends BaseAdapter {
                 return true;
             }
 
-            console.warn(chalk.yellow('\n⚠️  自動註冊 Skill 失敗。'));
-            console.log(chalk.white('這可能是因為 API Key 未設定。請嘗試手動執行以下指令：'));
+            console.warn(chalk.yellow('\n⚠️  自動安裝 Skill 失敗。'));
+            console.log(chalk.white('這可能是因為 API Key 未設定或網路問題。請嘗試手動執行以下指令：'));
             console.log(chalk.cyan(`\n  ${cmd}\n`));
+            console.log(chalk.gray('若您已經安裝過此 Skill，請忽略此訊息。'));
             return false;
         }
         return true;
@@ -234,21 +219,24 @@ class ClaudeAdapter extends BaseAdapter {
     }
 
     async installSkill(repoUrl) {
-        // Universal Local Clone Strategy for Claude
-        const repoName = 'tw-stocker-consultant';
-        const targetPath = path.resolve(process.cwd(), repoName);
-        
-        console.log(`[Claude] 正在檢查 Skill: ${targetPath}...`);
+        // Manual installation for Claude Code:
+        // Clone into ./.claude/skills/
+        const targetDir = '.claude/skills';
+        const repoName = repoUrl.split('/').pop().replace('.git', '');
+        const installPath = `${targetDir}/${repoName}`;
 
-        if (shell.test('-d', targetPath)) {
-            console.log(chalk.gray(`   [Claude] Skill 目錄已存在，跳過下載。`));
+        console.log(`[Claude] 正在建立 Skill 目錄: ${targetDir}`);
+        shell.mkdir('-p', targetDir);
+
+        if (shell.test('-d', installPath)) {
+            console.log(chalk.gray(`   [Claude] Skill 已存在於 ${installPath}，跳過下載。`));
         } else {
-            console.log(`[Claude] 正在 Clone Skill...`);
-            if (shell.exec(`git clone ${repoUrl} ${targetPath}`).code !== 0) {
+            console.log(`[Claude] 正在 Clone Skill 到 ${installPath}...`);
+            if (shell.exec(`git clone ${repoUrl} ${installPath}`).code !== 0) {
                  throw new Error("Git Clone 失敗");
             }
+            console.log(chalk.green(`✅ Skill 安裝完成 (${installPath})`));
         }
-        
         return true;
     }
 
