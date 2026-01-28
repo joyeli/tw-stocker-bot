@@ -2,7 +2,8 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const Conf = require('conf');
 const chalk = require('chalk');
-const memory = require('../memory'); // Moved to src/memory.js
+const https = require('https'); // Import https
+const memory = require('../memory'); 
 const aiCli = require('../adapters/ai-cli');
 const SchedulerService = require('./scheduler');
 
@@ -15,7 +16,9 @@ class BotService {
             throw new Error('找不到 Telegram Bot Token。請在 .env 檔案中設定 BOT_TOKEN，或使用 config 指令設定。');
         }
 
-        this.bot = new Telegraf(this.token);
+        // Force IPv4 Agent to prevent ETIMEDOUT on some networks
+        const agent = new https.Agent({ family: 4, keepAlive: true });
+        this.bot = new Telegraf(this.token, { telegram: { agent } });
         
         // Setup AI Adapter
         const cliName = this.config.get('ai.cli') || 'gemini';
