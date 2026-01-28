@@ -40,18 +40,16 @@ async function startPairing(existingToken = null) {
         // throw new Error(`Invalid Token: ${e.message}`); // Allow proceed
     }
 
-    // 3. Generate OTP & Deep Link
+    // 3. Generate OTP
     const otp = Math.floor(1000 + Math.random() * 9000).toString(); // 4 digit code
-    const botLink = `https://t.me/${botInfo.username}?start=${otp}`;
-
+    
     console.log(chalk.yellow('\n⚠️  請執行以下動作完成配對：'));
-    console.log(`1. 請點擊此連結 (或複製到瀏覽器開啟)：`);
-    console.log(chalk.cyan.underline(botLink));
-    console.log(`2. 在 Telegram 中點擊 **Start**`);
-    console.log(chalk.gray(`(或者手動搜尋 @${botInfo.username} 並發送驗證碼: ${otp})`));
+    console.log(`1. 開啟 Telegram 搜尋 @${botInfo.username}`);
+    console.log(`2. 點擊 **Start** (若已開始，請忽略)`);
+    console.log(`3. 請手動發送驗證碼: ${chalk.green.bold(otp)}`);
 
     // 4. Wait for user message
-    const waitSpinner = ora(`等待配對訊號... (逾時 60秒)`).start();
+    const waitSpinner = ora(`等待您發送 ${otp} ... (逾時 60秒)`).start();
     
     return new Promise((resolve, reject) => {
         let isDone = false;
@@ -65,50 +63,36 @@ async function startPairing(existingToken = null) {
             }
         }, 60000);
 
-        // Handle /start specially - Don't treat it as a wrong code
-        tempBot.start((ctx) => {
-            // Check if start payload contains OTP
-            // /start 1234
-            const payload = ctx.message.text.split(' ')[1];
-            
-            if (payload === otp) {
-                // Success via Deep Link
-                completePairing(ctx);
-            } else {
-                ctx.reply('👋 配對模式已啟動。請輸入 CLI 顯示的 4 位數驗證碼。');
-            }
-        });
+        // Handle /start - Just a friendly greeting
+        tempBot.start((ctx) => ctx.reply('👋 配對模式已啟動。請輸入 CLI 顯示的 4 位數驗證碼。'));
 
         tempBot.on('text', async (ctx) => {
             const text = ctx.message.text.trim();
+            
+            // Check manual input
             if (text === otp) {
-                // Success via Manual Entry
-                completePairing(ctx);
+                isDone = true;
+                clearTimeout(timeout);
+                
+                const ownerId = ctx.from.id;
+                const username = ctx.from.username;
+                
+                await ctx.reply('✅ 配對成功！我是您的專屬助理。');
+                waitSpinner.succeed(`收到訊號！配對成功。 (Owner ID: ${ownerId})`);
+                
+                tempBot.stop();
+                resolve({
+                    token: token,
+                    ownerId: ownerId,
+                    username: username
+                });
             } else {
+                // Only reply error if it looks like a code attempt
                 if (/^\d{4}$/.test(text)) {
                     await ctx.reply('❌ 驗證碼錯誤，請重新輸入 CLI 顯示的代碼。');
                 }
             }
         });
-
-        function completePairing(ctx) {
-            if (isDone) return;
-            isDone = true;
-            clearTimeout(timeout);
-            
-            const ownerId = ctx.from.id;
-            const username = ctx.from.username;
-            
-            ctx.reply('✅ 配對成功！我是您的專屬助理。');
-            waitSpinner.succeed(`收到訊號！配對成功。 (Owner ID: ${ownerId})`);
-            
-            tempBot.stop();
-            resolve({
-                token: token,
-                ownerId: ownerId,
-                username: username
-            });
-        }
 
         // dropPendingUpdates: true => Ignore messages sent while bot was offline
         tempBot.launch({ dropPendingUpdates: true });
