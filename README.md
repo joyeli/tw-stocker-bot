@@ -25,6 +25,10 @@
 
 ## 🚀 快速開始 (Quick Start)
 
+### 0. 事前準備 (Prerequisite)
+請先向 Telegram 的官方機器人 **[@BotFather](https://t.me/BotFather)** 申請一組 Bot Token。
+*(詳細步驟請參閱 [使用者手冊](docs/USER_GUIDE.md#如何申請-telegram-bot-token))*
+
 ### 1. 安裝 CLI 工具
 ```bash
 npm install -g joyeli/tw-stocker-bot

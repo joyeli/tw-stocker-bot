@@ -15,11 +15,26 @@
 
 ### B. Telegram 安全配對
 為了防止他人使用您的 Bot（消耗您的 API 額度），我們設計了配對機制：
-1.  準備好您的 **Telegram Bot Token** (向 [@BotFather](https://t.me/BotFather) 申請)。
-2.  在工作目錄下執行 `tw-stocker-bot init` 並輸入 Token。
-3.  CLI 會顯示一組 **4 位數驗證碼** (例如 `8826`)。
-4.  開啟您的 Bot，發送這組號碼。
-5.  **配對成功！** 系統會鎖定您的 Telegram ID，此後只有您能操作此 Bot。
+
+#### 如何申請 Telegram Bot Token？
+1.  開啟 Telegram，搜尋 **[@BotFather](https://t.me/BotFather)** (這是 Telegram 官方的機器人管理員)。
+2.  傳送指令 `/newbot`。
+3.  依指示輸入 **Bot 顯示名稱** (例如: `My Stock Assistant`)。
+4.  依指示輸入 **Bot ID** (必須以 `bot` 結尾，例如: `my_stock_2026_bot`)。
+5.  成功後，BotFather 會給您一串 **HTTP API Token** (例如: `123456:ABC-DEF...`)。**請妥善保管此 Token**。
+
+#### 建議的隱私設定 (Privacy Settings)
+為了確保您的 Bot 不會被隨意拉入群組或讀取不相關訊息，建議進行以下設定：
+1.  對 @BotFather 傳送 `/mybots`。
+2.  選擇您的 Bot -> **Bot Settings**。
+3.  **Allow Groups?**: 建議設為 **Turn groups off** (除非您想在群組使用)。
+4.  **Group Privacy**: 建議設為 **Turn on** (Bot 只讀取跟它有關的指令)。
+
+#### 開始配對
+1.  在工作目錄下執行 `tw-stocker-bot init` 並輸入 Token。
+2.  CLI 會顯示一組 **4 位數驗證碼** (例如 `8826`)。
+3.  開啟您的 Bot，發送這組號碼。
+4.  **配對成功！** 系統會鎖定您的 Telegram ID，此後只有您能操作此 Bot。
 
 ---
 
