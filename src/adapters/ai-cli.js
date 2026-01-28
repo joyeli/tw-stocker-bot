@@ -84,9 +84,20 @@ class GeminiAdapter extends BaseAdapter {
 
     async installSkill(repoUrl) {
         console.log(`[Gemini] 正在安裝 Skill: ${repoUrl}...`);
-        const cmd = `gemini skills install ${repoUrl} --scope workspace`;
-        if (shell.exec(cmd).code !== 0) {
-            throw new Error("Gemini Skill 安裝失敗");
+        
+        // Use --consent to skip confirmation prompt
+        const cmd = `gemini skills install ${repoUrl} --scope workspace --consent`;
+        
+        // Execute with logging enabled
+        const res = shell.exec(cmd, { silent: false });
+        
+        if (res.code !== 0) {
+            console.warn(chalk.yellow('\n⚠️  自動安裝 Skill 失敗。'));
+            console.log(chalk.white('這可能是因為 API Key 未設定或網路問題。請嘗試手動執行以下指令：'));
+            console.log(chalk.cyan(`\n  ${cmd}\n`));
+            console.log(chalk.gray('若您已經安裝過此 Skill，請忽略此訊息。'));
+            // We don't throw error here to allow init to continue
+            return false;
         }
         return true;
     }
