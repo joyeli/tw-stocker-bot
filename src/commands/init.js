@@ -69,7 +69,13 @@ async function initCommand(options) {
         message: `選擇 ${selectedCLI} 模型：`,
         choices: models
     }]);
-    envData.aiModel = modelAnswer.model;
+    
+    // Save to User Config (Preferences)
+    userConfig.set('ai.cli', selectedCLI);
+    userConfig.set('ai.model', modelAnswer.model);
+    
+    // Also keep in envData for reference if needed, or remove from envData
+    // envData.aiModel = modelAnswer.model; // Duplicate, removing for clarity
 
     // --- Phase 2: Skill Installation & Python ---
     console.log(chalk.cyan('\n📦 Phase 2: Skill 部署'));
