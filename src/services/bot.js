@@ -167,39 +167,56 @@ class BotService {
             // Ignore commands
             if (userMsg.startsWith('/')) return;
 
-            // Notify user "Thinking..." using native Chat Action
-            // Telegram 'typing' status lasts for ~5s, so we need a loop for long tasks
-            await ctx.sendChatAction('typing');
-            const typingInterval = setInterval(() => {
-                ctx.sendChatAction('typing').catch(() => {}); // Ignore errors if user blocked bot etc.
-            }, 4000);
+            // Notify user immediately to prevent Telegram timeout
+            // Send a "Processing" message that we will edit later if possible, 
+            // or just use it as a placeholder.
+            const sentMsg = await ctx.reply('🤔 正在調用 AI 分析師，請稍候...');
+            const chatId = ctx.chat.id;
+            const msgId = sentMsg.message_id;
 
-            try {
-                // 1. Get Context (Memory v2)
-                const context = memory.getAIContext(userId);
-                
-                // Add current message to history
-                memory.addHistory(userId, 'user', userMsg);
-                
-                // 2. Call AI CLI
-                console.log(chalk.cyan(`[AI] 正在處理來自 ${userId} 的訊息: ${userMsg}`));
-                
-                const response = await this.adapter.execute(userMsg, context, this.model);
-                
-                // Stop typing loop
-                clearInterval(typingInterval);
+            // Send 'typing' action to show activity
+            ctx.sendChatAction('typing').catch(() => {});
 
-                // Add response to history
-                memory.addHistory(userId, 'model', response);
-                
-                // 3. Reply
-                await ctx.replyWithMarkdown(response); 
+            // Process in background (DO NOT AWAIT here to avoid blocking middleware)
+            (async () => {
+                try {
+                    // Keep sending typing action every 4s
+                    const typingInterval = setInterval(() => {
+                        ctx.telegram.sendChatAction(chatId, 'typing').catch(() => {});
+                    }, 4000);
 
-            } catch (e) {
-                clearInterval(typingInterval); // Ensure we stop typing
-                console.error(chalk.red(`[AI 錯誤] ${e.message}`));
-                await ctx.reply(`💥 抱歉，分析過程中發生錯誤：\n${e.message}\n\n請稍後再試。`);
-            }
+                    // 1. Get Context
+                    const context = memory.getAIContext(userId);
+                    // Add user msg to history
+                    memory.addHistory(userId, 'user', userMsg);
+                    
+                    console.log(chalk.cyan(`[AI] 正在處理來自 ${userId} 的訊息: ${userMsg}`));
+                    
+                    // 2. Execute AI (Long running task)
+                    const response = await this.adapter.execute(userMsg, context, this.model);
+                    
+                    clearInterval(typingInterval);
+
+                    // 3. Save & Reply
+                    memory.addHistory(userId, 'model', response);
+                    
+                    // Delete the "Thinking" placeholder and send real response
+                    // Or edit it. Editing is cleaner.
+                    try {
+                        await ctx.telegram.deleteMessage(chatId, msgId);
+                    } catch (e) { /* ignore if delete fails */ }
+                    
+                    await ctx.telegram.sendMessage(chatId, response, { parse_mode: 'Markdown' });
+
+                } catch (e) {
+                    console.error(chalk.red(`[AI 錯誤] ${e.message}`));
+                    try {
+                        await ctx.telegram.editMessageText(chatId, msgId, undefined, `💥 分析失敗：\n${e.message}`);
+                    } catch (err) {
+                        await ctx.telegram.sendMessage(chatId, `💥 分析失敗：\n${e.message}`);
+                    }
+                }
+            })();
         });
 
         // --- Launch ---
