@@ -45,7 +45,7 @@ async function startPairing(existingToken = null) {
     
     console.log(chalk.yellow('\n⚠️  請執行以下動作完成配對：'));
     console.log(`1. 開啟 Telegram 搜尋 @${botInfo.username}`);
-    console.log(`2. 點擊 **Start** (若已開始，請忽略)`);
+    console.log(`2. 傳送 ${chalk.cyan('/start')} (若已開始，請忽略)`);
     console.log(`3. 請手動發送驗證碼: ${chalk.green.bold(otp)}`);
 
     // 4. Wait for user message
