@@ -11,14 +11,12 @@
 ### A. AI 引擎選擇
 系統支援兩種 AI 核心，請確保您已安裝對應的 CLI 工具：
 *   **Gemini CLI (推薦)**: `npm install -g @google/gemini-cli`
-    *   優點: 整合度高，支援 Extension。
 *   **Claude Code**: `npm install -g @anthropic-ai/claude-code`
-    *   優點: 模型強大 (Opus/Sonnet)。
 
 ### B. Telegram 安全配對
 為了防止他人使用您的 Bot（消耗您的 API 額度），我們設計了配對機制：
 1.  準備好您的 **Telegram Bot Token** (向 [@BotFather](https://t.me/BotFather) 申請)。
-2.  在 `tw-stocker-bot init` 過程中輸入 Token。
+2.  在工作目錄下執行 `tw-stocker-bot init` 並輸入 Token。
 3.  CLI 會顯示一組 **4 位數驗證碼** (例如 `8826`)。
 4.  開啟您的 Bot，發送這組號碼。
 5.  **配對成功！** 系統會鎖定您的 Telegram ID，此後只有您能操作此 Bot。
@@ -116,7 +114,6 @@ npm install -g pm2
 ```bash
 pm2 start tw-stocker-bot --name stocker-bot -- start
 ```
-*(若您是直接下載原始碼執行，請使用 `pm2 start npm --name stocker-bot -- start`)*
 
 ### 步驟 3: 開機自啟
 確保伺服器重開機後 Bot 也會自動復活：

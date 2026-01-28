@@ -28,6 +28,7 @@ class MemoryManager {
     constructor() {
         this.db = new Conf({
             projectName: 'tw-stocker-bot',
+            cwd: process.cwd(), // Force local DB
             defaults: { users: {} }
         });
         this.HISTORY_LIMIT = 10; // Keep last 10 messages

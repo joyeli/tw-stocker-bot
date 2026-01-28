@@ -2,15 +2,19 @@ require('dotenv').config();
 const { Telegraf } = require('telegraf');
 const Conf = require('conf');
 const chalk = require('chalk');
-const https = require('https'); // Import https
+const https = require('https'); 
 const memory = require('../memory'); 
 const aiCli = require('../adapters/ai-cli');
 const SchedulerService = require('./scheduler');
 
 class BotService {
     constructor() {
-        // Use 'bot-config' to match init.js
-        this.config = new Conf({ projectName: 'tw-stocker-bot', configName: 'bot-config' });
+        // Use 'bot-config' to match init.js, and force CWD
+        this.config = new Conf({ 
+            projectName: 'tw-stocker-bot', 
+            configName: 'bot-config',
+            cwd: process.cwd() 
+        });
         this.token = process.env.BOT_TOKEN || this.config.get('telegram.token');
         
         if (!this.token) {

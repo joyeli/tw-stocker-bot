@@ -6,7 +6,8 @@
     "tw-stocker-bot": "./bin/tw-stocker-bot.js"
   },
   "scripts": {
-    "start": "node index.js",
+    "init": "node bin/tw-stocker-bot.js init",
+    "start": "node bin/tw-stocker-bot.js start",
     "dev": "nodemon index.js",
     "test": "node test/test_pairing_simulation.js"
   },
