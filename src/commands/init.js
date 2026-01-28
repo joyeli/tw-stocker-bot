@@ -88,18 +88,13 @@ async function initCommand(options) {
     }
 
     // Resolve Python Path (Skill specific)
-    // Assuming relative path for now based on standard install
-    // For Gemini: workspace/tw-stocker-consultant
-    // For Claude: .claude/skills/tw-stocker-consultant
+    // Assuming relative path based on workspace installation strategy
     let skillRoot = '';
     if (selectedCLI === 'gemini') {
-         skillRoot = path.resolve(process.cwd(), '../tw-stocker-consultant'); // Dev Environment
-         // If not found, it might be in some hidden global path managed by Gemini CLI.
-         // In this case, we skip Python init and rely on Gemini to handle it (or user manual init).
-         if (!fs.existsSync(skillRoot)) {
-             skillRoot = null; 
-         }
+         // Gemini (Workspace Scope) installs to .gemini/skills/...
+         skillRoot = path.resolve(process.cwd(), '.gemini/skills/tw-stocker-consultant');
     } else {
+         // Claude (Manual Clone) installs to .claude/skills/...
          skillRoot = path.resolve(process.cwd(), '.claude/skills/tw-stocker-consultant');
     }
 
@@ -110,25 +105,31 @@ async function initCommand(options) {
         if (fs.existsSync(cliScript)) {
             console.log(`   Skill Core: ${cliScript}`);
             // Python Init
-            console.log(chalk.gray('   正在初始化 Python 環境 (venv)...'));
-            if (shell.exec(`python3 "${cliScript}" init --mode venv`, { silent: true }).code !== 0) {
-                console.error(chalk.red('   ❌ Python init 失敗，請稍後手動檢查。'));
+            console.log(chalk.gray('   正在初始化 Python 環境 (venv)... 這可能需要幾分鐘...'));
+            
+            // Execute python init INSIDE the skill directory to ensure venv is created there
+            const initRes = shell.exec(`python3 scripts/cli.py init --mode venv`, { 
+                silent: false,
+                cwd: skillRoot // Critical: Run inside the skill dir
+            });
+            
+            if (initRes.code !== 0) {
+                 console.error(chalk.red('   ❌ Python init 失敗，請稍後手動檢查。'));
             } else {
-                console.log(chalk.green('   ✅ Python 環境就緒'));
-                envData.pythonMode = 'venv';
-                // Try to find venv path
-                const venvPath = path.join(skillRoot, '.venv/bin/python'); // Linux/Mac
-                if (fs.existsSync(venvPath)) envData.pythonExec = venvPath;
-                else envData.pythonExec = 'python3'; // Fallback
+                 console.log(chalk.green('   ✅ Python 環境就緒 (Dependencies Installed)'));
+                 envData.pythonMode = 'venv';
+                 // Try to find venv path (relative to skill root)
+                 const venvPath = path.join(skillRoot, '.venv/bin/python'); // Linux/Mac
+                 if (fs.existsSync(venvPath)) envData.pythonExec = venvPath;
+                 else envData.pythonExec = 'python3'; // Fallback
             }
         } else {
             console.warn(chalk.yellow(`   ⚠️  警告：找不到 Skill 入口 (${cliScript})`));
         }
     } else {
+        console.warn(chalk.yellow(`   ⚠️  警告：找不到 Skill 目錄 (${skillRoot})，跳過 Python 初始化。`));
         if (selectedCLI === 'gemini') {
-            console.log(chalk.gray('   [Info] Gemini 模式：跳過 Python 環境初始化 (由 Gemini CLI 管理)。'));
-        } else {
-            console.warn(chalk.yellow('   ⚠️  警告：找不到 Skill 目錄，無法初始化 Python 環境。'));
+            console.log(chalk.gray('   (請確認 gemini skills install 是否成功)'));
         }
     }
 
