@@ -150,7 +150,13 @@ Analyze deeply based on the user's holdings (cost, strategy).
                         return reject(new Error(`Gemini CLI 錯誤: ${stderr}`));
                     }
                 }
-                resolve(stdout.trim());
+                
+                // Sanitize Output: Remove "I will..." lines (Agent thought process)
+                let cleanOutput = stdout.replace(/^I will .*$/gm, '');
+                // Remove multiple empty lines resulting from the deletion
+                cleanOutput = cleanOutput.replace(/\n\s*\n/g, '\n\n').trim();
+                
+                resolve(cleanOutput);
             });
         });
     }
